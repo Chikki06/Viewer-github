@@ -13,6 +13,7 @@ DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 1028
 DEEPZOOM_OVERLAP = 1
 DEEPZOOM_LIMIT_BOUNDS = True
+DZI_FILES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), r'viewer-github\files')
 
 class PILBridge:
     def __init__(self, image_path):
@@ -46,25 +47,25 @@ def serve_image(filename):
 
 @app.route('/dzi/<image_id>.dzi')
 def get_dzi(image_id):
-    dzi_path = os.path.join('files', f'{image_id}.dzi')
+    dzi_path = os.path.join(DZI_FILES_DIR, f'{image_id}.dzi')
     if os.path.exists(dzi_path):
-        return send_from_directory('files', f'{image_id}.dzi')
+        return send_from_directory(DZI_FILES_DIR, f'{image_id}.dzi')
     return jsonify({'error': 'DZI file not found'}), 404
 
 @app.route('/dzi/<image_id>_files/<int:level>/<int:col>_<int:row>.<format>')
 def get_tile(image_id, level, col, row, format):
-    tile_path = os.path.join('files', f'{image_id}.dzi_files', str(level), f'{col}_{row}.{format}')
+    tile_path = os.path.join(DZI_FILES_DIR, f'{image_id}_files', str(level), f'{col}_{row}.{format}')
     if os.path.exists(tile_path):
-        return send_from_directory(os.path.join('files', f'{image_id}.dzi_files', str(level)), f'{col}_{row}.{format}')
+        return send_from_directory(os.path.join(DZI_FILES_DIR, f'{image_id}_files', str(level)), f'{col}_{row}.{format}')
     return jsonify({'error': 'Tile not found'}), 404
 
 @app.route('/available-images')
 def get_available_images():
     images = []
-    for file in os.listdir('files'):
+    for file in os.listdir(DZI_FILES_DIR):
         if file.endswith('.dzi'):
             images.append(file.replace('.dzi', ''))
     return jsonify(images)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8000)
+    app.run()
